@@ -59,7 +59,7 @@ def generate_ambient_svg(theme, engine):
             {"y": 150, "scale": 1.25, "dur": 20.0, "delay": -13.0},
             {"y": 172, "scale": 0.95, "dur": 27.0, "delay": -19.5}
         ]
-        for i, c in enumerate(clouds):
+        for c in clouds:
             cy = c["y"]
             sc = c["scale"]
             bw, bh = 54 * sc, 18 * sc
@@ -75,6 +75,64 @@ def generate_ambient_svg(theme, engine):
                 f'  </g>'
             ]
             elements.append("\n".join(cloud_g))
+        # Flying pixel birds in open blue sky
+        birds = [
+            {"y": 132, "dur": 13.0, "delay": -2.0, "sc": 1.1},
+            {"y": 162, "dur": 11.5, "delay": -8.0, "sc": 0.9}
+        ]
+        for b in birds:
+            elements.append(
+                f'  <path style="animation: cloud-loop {b["dur"]}s linear infinite {b["delay"]}s;" d="M 0,{b["y"]} Q 5,{b["y"]-6} 10,{b["y"]} Q 15,{b["y"]-6} 20,{b["y"]}" fill="none" stroke="#24292f" stroke-width="2" />'
+            )
+    elif effect == "mario_sky_night":
+        # Glowing crescent moon in night sky
+        elements.append('  <path d="M 45,28 A 16,16 0 1,0 72,55 A 20,20 0 1,1 45,28 Z" fill="#fff4bd" opacity="0.95" />')
+        # Twinkling night stars
+        for i, s in enumerate(getattr(engine, "ambient_items", [])):
+            if s.get("type") == "star":
+                dur = 1.6 + (i % 4) * 0.4
+                delay = (i % 6) * 0.3
+                elements.append(f'  <rect x="{s["x"]:.1f}" y="{s["y"]:.1f}" width="{s["size"]}" height="{s["size"]}" fill="#dbe7ff" style="animation: star-twinkle {dur:.1f}s ease-in-out infinite {delay:.1f}s;" />')
+        # Translucent, dim night clouds floating under moon
+        night_clouds = [
+            {"y": 142, "scale": 1.1, "dur": 26.0, "delay": 0.0},
+            {"y": 178, "scale": 0.85, "dur": 32.0, "delay": -8.5},
+            {"y": 152, "scale": 1.2, "dur": 22.0, "delay": -15.0},
+            {"y": 170, "scale": 0.95, "dur": 28.0, "delay": -21.0}
+        ]
+        for c in night_clouds:
+            cy = c["y"]
+            sc = c["scale"]
+            bw, bh = 54 * sc, 18 * sc
+            dur = c["dur"]
+            delay = c["delay"]
+            cloud_g = [
+                f'  <g style="animation: cloud-loop {dur:.1f}s linear infinite {delay:.1f}s; opacity: 0.42;">',
+                f'    <rect x="0" y="{cy + 8 * sc:.1f}" width="{bw:.1f}" height="{bh:.1f}" rx="{bh/2:.1f}" fill="#334b82" stroke="#1c2d54" stroke-width="1" />',
+                f'    <circle cx="{17 * sc:.1f}" cy="{cy + 13 * sc:.1f}" r="{11 * sc:.1f}" fill="#334b82" stroke="#1c2d54" stroke-width="1" />',
+                f'    <circle cx="{34 * sc:.1f}" cy="{cy + 10 * sc:.1f}" r="{14 * sc:.1f}" fill="#334b82" stroke="#1c2d54" stroke-width="1" />',
+                f'    <circle cx="{46 * sc:.1f}" cy="{cy + 14 * sc:.1f}" r="{10 * sc:.1f}" fill="#334b82" stroke="#1c2d54" stroke-width="1" />',
+                f'    <rect x="{8 * sc:.1f}" y="{cy + 8 * sc:.1f}" width="{bw - 16 * sc:.1f}" height="{10 * sc:.1f}" fill="#334b82" />',
+                f'  </g>'
+            ]
+            elements.append("\n".join(cloud_g))
+        # Floating retro Boo ghosts drifting in night
+        ghosts = [
+            {"y": 136, "dur": 15.0, "delay": -3.0},
+            {"y": 166, "dur": 13.5, "delay": -9.5}
+        ]
+        for gh in ghosts:
+            gy = gh["y"]
+            ghost_svg = [
+                f'  <g style="animation: cloud-loop {gh["dur"]}s linear infinite {gh["delay"]}s; opacity: 0.85;">',
+                f'    <circle cx="10" cy="{gy}" r="8" fill="#ffffff" stroke="#1c2d54" stroke-width="1" />',
+                f'    <ellipse cx="6" cy="{gy - 2}" rx="1.5" ry="2" fill="#0d1b3e" />',
+                f'    <ellipse cx="12" cy="{gy - 2}" rx="1.5" ry="2" fill="#0d1b3e" />',
+                f'    <path d="M 6,{gy+3} Q 9,{gy+6} 12,{gy+3}" stroke="#0d1b3e" stroke-width="1" fill="none" />',
+                f'    <polygon points="2,{gy+4} 0,{gy+2} 3,{gy+1}" fill="#ffffff" />',
+                f'  </g>'
+            ]
+            elements.append("\n".join(ghost_svg))
     elif effect == "neon_grid":
         horizon_y = int(engine.canvas_h * 0.65)
         elements.append(f'  <g class="synthwave-grid">')
@@ -102,6 +160,31 @@ def generate_ambient_svg(theme, engine):
                 stream_nodes.append(f'    <rect x="{x}" y="{py}" width="2" height="4" fill="{col_hex}" opacity="{alpha}" />')
             stream_nodes.append('  </g>')
             elements.append("\n".join(stream_nodes))
+    elif effect == "sakura_drift":
+        # 16 drifting cherry blossom petals across spring night
+        petals = [
+            {"x": 40, "y": -15, "dur": 8.5, "delay": 0.0, "sc": 1.1},
+            {"x": 120, "y": -15, "dur": 10.0, "delay": -3.2, "sc": 0.9},
+            {"x": 210, "y": -15, "dur": 9.0, "delay": -6.5, "sc": 1.2},
+            {"x": 310, "y": -15, "dur": 11.2, "delay": -1.8, "sc": 0.85},
+            {"x": 400, "y": -15, "dur": 9.6, "delay": -4.7, "sc": 1.05},
+            {"x": 490, "y": -15, "dur": 8.8, "delay": -8.1, "sc": 1.15},
+            {"x": 580, "y": -15, "dur": 10.5, "delay": -5.5, "sc": 0.95},
+            {"x": 80, "y": -15, "dur": 9.2, "delay": -7.0, "sc": 1.0},
+            {"x": 260, "y": -15, "dur": 11.5, "delay": -9.0, "sc": 0.8},
+            {"x": 440, "y": -15, "dur": 8.6, "delay": -2.5, "sc": 1.1},
+            {"x": 540, "y": -15, "dur": 10.2, "delay": -7.8, "sc": 0.9}
+        ]
+        for p in petals:
+            x, y = p["x"], p["y"]
+            sc = p["sc"]
+            dur = p["dur"]
+            delay = p["delay"]
+            elements.append(
+                f'  <g style="animation: sakura-flutter {dur:.1f}s linear infinite {delay:.1f}s;">'
+                f'<path d="M {x},{y} C {x+6*sc:.1f},{y-4*sc:.1f} {x+10*sc:.1f},{y+2*sc:.1f} {x+6*sc:.1f},{y+8*sc:.1f} C {x+2*sc:.1f},{y+4*sc:.1f} {x-2*sc:.1f},{y+2*sc:.1f} {x},{y} Z" fill="#ffb7c5" opacity="0.85" />'
+                f'</g>'
+            )
     return elements
 
 def generate_paddle_svg(pskin, engine, paddle_hex):

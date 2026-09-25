@@ -1,8 +1,11 @@
 # Generate Brick Breaker
 
 <p align="center">
+  <a href="https://brickbreaker-live.netlify.app" target="_blank">
+    <img src="https://img.shields.io/badge/Live_Demo-brickbreaker--live.netlify.app-ff5964.svg?style=flat-square&logo=netlify" alt="Live Demo" />
+  </a>
   <a href="https://github.com/marketplace/actions/generate-brick-breaker">
-    <img src="https://img.shields.io/badge/Marketplace-v1.3.2-blue.svg?logo=github&style=flat-square" alt="Marketplace" />
+    <img src="https://img.shields.io/badge/Marketplace-v1.6.1-blue.svg?logo=github&style=flat-square" alt="Marketplace" />
   </a>
   <a href="https://github.com/MakdumIbrohim/generate-brick-breaker/actions">
     <img src="https://img.shields.io/github/actions/workflow/status/MakdumIbrohim/generate-brick-breaker/generate.yml?branch=main&style=flat-square&label=build" alt="Build Status" />
@@ -21,13 +24,9 @@
 
 Turn your GitHub contribution graph into an automated retro Brick Breaker game animation (SVG or GIF) for your profile README.
 
-[English](#english) • [Bahasa Indonesia](#bahasa-indonesia)
-
 ---
 
-## English
-
-### Customization Options
+## Customization Options
 
 #### Ball Skin Options (`ball_skin`)
 | Option | Preview |
@@ -41,7 +40,7 @@ Turn your GitHub contribution graph into an automated retro Brick Breaker game a
 #### Paddle Skin Options (`paddle_skin`)
 | Option | Preview |
 | :---: | :---: |
-| `default` | Primary theme color |
+| `classic` (default) | Primary theme color |
 | `laser` | <img src="assets/preview/sample_paddle_laser.svg" width="340" alt="paddle laser" /> |
 | `retro` | <img src="assets/preview/sample_paddle_retro.svg" width="340" alt="paddle retro" /> |
 | `mecha` | <img src="assets/preview/sample_paddle_mecha.svg" width="340" alt="paddle mecha" /> |
@@ -50,10 +49,31 @@ Turn your GitHub contribution graph into an automated retro Brick Breaker game a
 #### Board Theme Options (`theme`)
 | Option | Preview |
 | :---: | :---: |
-| `dark` (default) | <img src="assets/preview/sample_theme_dark.svg" width="340" alt="dark theme" /> |
+| `classic` (default) | <img src="assets/preview/sample_theme_classic.svg" width="340" alt="classic theme" /> |
 | `sky` | <img src="assets/preview/sample_theme_sky.svg" width="340" alt="sky theme" /> |
+| `sky-night` | <img src="assets/preview/sample_theme_sky_night.svg" width="340" alt="sky night theme" /> |
 | `synthwave` | <img src="assets/preview/sample_theme_synthwave.svg" width="340" alt="synthwave theme" /> |
 | `matrix` | <img src="assets/preview/sample_theme_matrix.svg" width="340" alt="matrix theme" /> |
+| `sakura` | <img src="assets/preview/sample_theme_sakura.svg" width="340" alt="sakura theme" /> |
+
+#### Custom Brick Color (`brick_color` / `--brick-color` )
+*Applies to the `classic` board theme only.*
+- **Single HEX (Auto-Gradient)**: Pass 1 HEX color (e.g. `'#00b4d8'`) to automatically generate all 4 brightness levels.
+- **Combined Multi-HEX**: Pass 4 comma-separated HEX colors (e.g. `'#FFADAD,#FFD6A5,#FDFFB6,#9BF6FF'`) from lowest to highest level.
+
+#### Ball Speed Options (`ball_speed` / `--speed`)
+- **Presets**: `slow` (4.0), `normal` (6.5), `fast` (9.0), `turbo` (12.0).
+- **Custom Value**: Any numeric speed from `2.5` to `20.0` (e.g. `6.0`).
+- *Default*: `normal` (6.5) — balanced classic arcade speed.
+
+---
+
+### Live Web Studio
+
+Customize skins, test themes, and download your generated game SVG/GIF online without any installation:
+#### [https://brickbreaker-live.netlify.app](https://brickbreaker-live.netlify.app)
+
+<video src="https://github.com/user-attachments/assets/9c0854c2-1ca4-4367-9408-904013870ef9" width="50%" autoplay loop muted playsinline></video>
 
 ---
 
@@ -68,7 +88,8 @@ name: Generate Brick Breaker
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    # Runs automatically every hour to sync new commits
+    - cron: "0 * * * *"
   push:
     branches:
       - main
@@ -93,11 +114,19 @@ jobs:
           # Options: classic | fire | ice | lightning | poison
           ball_skin: classic
 
-          # Options: dark | sky | synthwave | matrix
-          theme: dark
+          # Options: classic | sky | sky-night | synthwave | matrix | sakura
+          theme: classic
 
-          # Options: default | laser | retro | mecha | cyber
-          paddle_skin: default
+          # Options: classic | laser | retro | mecha | cyber
+          paddle_skin: classic
+
+          # Optional: Custom brick color (applies to classic theme only).
+          # - Single HEX (auto-gradient): '#00b4d8'
+          # - Combined Multi-HEX (levels 1-4): '#FFADAD,#FFD6A5,#FDFFB6,#9BF6FF'
+          # brick_color: '#00b4d8'
+
+          # Optional: Custom ball speed: slow | normal | fast | turbo or number (e.g. '6.5', default: normal).
+          # ball_speed: normal
 
       - name: Commit and Push
         run: |
@@ -105,7 +134,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
           git diff --staged --quiet || git commit -m "chore: update brick breaker assets"
-          git pull --rebase origin main || true
+          git pull --rebase --autostash origin main || true
           git push origin main
 ```
 
@@ -127,16 +156,22 @@ jobs:
 git clone https://github.com/MakdumIbrohim/generate-brick-breaker.git
 cd generate-brick-breaker
 pip install pillow
-python generate.py <username> [output.svg | output.gif] [skin] [theme] [paddle_skin]
+
+# Show help and available options
+python generate.py --help
 ```
 
 Examples:
 ```bash
-# Output SVG (recommended: lightweight vector animation)
-python generate.py MakdumIbrohim game.svg
+# Flexible flag-based syntax (single HEX or 4 combined HEX, fast speed)
+python generate.py YourGithubUsername --skin fire --theme classic --paddle mecha --brick-color "#00b4d8" --speed fast
+# or with 4 combined HEX colors:
+python generate.py YourGithubUsername --skin fire --theme classic --paddle mecha --brick-color "#FFADAD,#FFD6A5,#FDFFB6,#9BF6FF" --speed fast
 
-# Output GIF
-python generate.py MakdumIbrohim game.gif fire dark laser
+# Or classic positional syntax
+python generate.py YourGithubUsername game.svg fire classic laser "#00b4d8" 14.0
+# or with 4 combined HEX colors:
+python generate.py YourGithubUsername game.svg fire classic laser "#FFADAD,#FFD6A5,#FDFFB6,#9BF6FF" 14.0
 ```
 
 **Using Docker (Without installing Python):**
@@ -144,122 +179,12 @@ python generate.py MakdumIbrohim game.gif fire dark laser
 # Run with Docker Compose (outputs to current folder)
 docker compose up
 
-# Or run directly with Docker
+# Build Docker image
 docker build -t generate-brick-breaker .
-docker run --rm -v $(pwd):/output generate-brick-breaker MakdumIbrohim /output/game.svg
-```
 
----
+# Run directly with flags (supports all skins, themes, custom colors, and speed)
+docker run --rm -v $(pwd):/output generate-brick-breaker YourGithubUsername -o /output/game.svg --skin fire --theme classic --paddle mecha --brick-color "#00b4d8" --speed fast
 
-## Bahasa Indonesia
-
-### Pilihan Kustomisasi
-
-#### Pilihan Skin Bola (`ball_skin`)
-| Opsi | Preview |
-| :---: | :---: |
-| `classic` (default) | <img src="assets/preview/sample_classic.svg" width="340" alt="classic" /> |
-| `fire` | <img src="assets/preview/sample_fire.svg" width="340" alt="fire" /> |
-| `ice` | <img src="assets/preview/sample_ice.svg" width="340" alt="ice" /> |
-| `lightning` | <img src="assets/preview/sample_lightning.svg" width="340" alt="lightning" /> |
-| `poison` | <img src="assets/preview/sample_poison.svg" width="340" alt="poison" /> |
-
-#### Pilihan Skin Paddle (`paddle_skin`)
-| Opsi | Preview |
-| :---: | :---: |
-| `default` | Warna primer tema aktif |
-| `laser` | <img src="assets/preview/sample_paddle_laser.svg" width="340" alt="paddle laser" /> |
-| `retro` | <img src="assets/preview/sample_paddle_retro.svg" width="340" alt="paddle retro" /> |
-| `mecha` | <img src="assets/preview/sample_paddle_mecha.svg" width="340" alt="paddle mecha" /> |
-| `cyber` | <img src="assets/preview/sample_paddle_cyber.svg" width="340" alt="paddle cyber" /> |
-
-#### Pilihan Tema Papan (`theme`)
-| Opsi | Preview |
-| :---: | :---: |
-| `dark` (default) | <img src="assets/preview/sample_theme_dark.svg" width="340" alt="dark theme" /> |
-| `sky` | <img src="assets/preview/sample_theme_sky.svg" width="340" alt="sky theme" /> |
-| `synthwave` | <img src="assets/preview/sample_theme_synthwave.svg" width="340" alt="synthwave theme" /> |
-| `matrix` | <img src="assets/preview/sample_theme_matrix.svg" width="340" alt="matrix theme" /> |
-
----
-
-### Panduan Instalasi & Penggunaan
-
-#### 1. Pasang di Profil GitHub (Otomatis)
-
-1. Di repo profil GitHub Anda (`username/username`), buat file `.github/workflows/brick-breaker.yml`:
-
-```yaml
-name: Generate Brick Breaker
-
-on:
-  schedule:
-    - cron: "0 0 * * *"
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: MakdumIbrohim/generate-brick-breaker@main
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          github_user: ${{ github.repository_owner }}
-
-          # Opsi: game.svg (disarankan) atau game.gif
-          output_path: game.svg
-
-          # Opsi: classic | fire | ice | lightning | poison
-          ball_skin: classic
-
-          # Opsi: dark | sky | synthwave | matrix
-          theme: dark
-
-          # Opsi: default | laser | retro | mecha | cyber
-          paddle_skin: default
-
-      - name: Commit and Push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git diff --staged --quiet || git commit -m "chore: update brick breaker assets"
-          git pull --rebase origin main || true
-          git push origin main
-```
-
-2. Beri izin write: buka repo **Settings** > **Actions** > **General** > **Workflow permissions** > pilih **Read and write permissions** > **Save**.
-
-3. Tampilkan di `README.md` profil Anda (sesuaikan ekstensi `.svg` atau `.gif` dengan `output_path` Anda):
-```markdown
-<p align="center">
-  <img src="game.svg" alt="Brick Breaker Game" />
-</p>
-```
-
-> **Catatan Cache Gambar:** GitHub menyimpan cache gambar profil melalui server Camo CDN. Jika Anda baru saja mengubah pengaturan tema/skin dan animasinya belum langsung berubah di profil, lakukan *hard refresh* (`Ctrl + F5` atau `Cmd + Shift + R`), buka lewat tab *Incognito*, atau tunggu 5–15 menit hingga cache CDN GitHub terperbarui otomatis.
-
-#### 2. Penggunaan di Lokal
-
-```bash
-git clone https://github.com/MakdumIbrohim/generate-brick-breaker.git
-cd generate-brick-breaker
-pip install pillow
-python generate.py <username_github> [output.svg | output.gif] [skin] [theme] [paddle_skin]
-```
-
-Contoh pemakaian:
-```bash
-# Output SVG (ringan & tajam di layar resolusi tinggi)
-python generate.py MakdumIbrohim game.svg
-
-# Output GIF
-python generate.py MakdumIbrohim game.gif fire dark laser
+# Optional: pass GITHUB_TOKEN for real-time GraphQL API
+docker run --rm -e GITHUB_TOKEN="ghp_xxx" -v $(pwd):/output generate-brick-breaker YourGithubUsername -o /output/game.svg
 ```
